@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+	<div class="row">
+		<div class="col-md-12">
+			<h1>Edit {{strategy.name}}</h1>
+		</div>
+	</div>
+
+
+	<div class="row">
+		<div class="col-md-12">
+			<form action="{{ url_for('editStrategy', strategy_id=strategy.id)}}" method = "post">
+				<div class="form-group">
+				<label for="name">Name:</label>
+				<input type ="text" class="form-control" maxlength="100" name="name" value="{{strategy.name}}">
+
+				<button type="submit" class="btn btn-primary" id="submit" type="submit">
+				<span class="glyphicon glyphicon-cutlery" aria-hidden="true"></span>Update</button>
+
+			</form>
+		</div>
+	</div>
+
+
+{% endblock %}
