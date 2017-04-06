@@ -330,9 +330,12 @@ def deleteStrategy(strategy_id):
     else:
         return render_template('deleteStrategy.html', strategy=strategyToDelete)
 
-# Show a restaurant menu
 
+# #######
+# TACTICS
+# ########
 
+# show tactics matching the strategy
 @app.route('/strategy/<int:strategy_id>/')
 @app.route('/strategy/<int:strategy_id>/tactic/')
 def showTactic(strategy_id):
@@ -346,68 +349,75 @@ def showTactic(strategy_id):
     return render_template('tactic.html', tactics=tactics, strategy=strategy)
 
 
-# Create a new menu item
-# @app.route('/restaurant/<int:restaurant_id>/menu/new/', methods=['GET', 'POST'])
-# def newMenuItem(restaurant_id):
-#     if 'username' not in login_session:
-#         return redirect('/login')
-#     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-#     if login_session['user_id'] != restaurant.user_id:
-#         return "<script>function myFunction() {alert('You are not authorized to add menu items to this restaurant. Please create your own restaurant in order to add items.');}</script><body onload='myFunction()''>"
-#         if request.method == 'POST':
-#             newItem = MenuItem(name=request.form['name'], description=request.form['description'], price=request.form[
-#                                'price'], course=request.form['course'], restaurant_id=restaurant_id, user_id=restaurant.user_id)
-#             session.add(newItem)
-#             session.commit()
-#             flash('New Menu %s Item Successfully Created' % (newItem.name))
-#             return redirect(url_for('showMenu', restaurant_id=restaurant_id))
-#     else:
-#         return render_template('newmenuitem.html', restaurant_id=restaurant_id)
+# Create a new tactic
+@app.route('/strategy/<int:strategy_id>/tactic/new/', methods=['GET', 'POST'])
+def newTactic(strategy_id):
+    # if 'username' not in login_session:
+    #     return redirect('/login')
+    strategy = session.query(Strategy).filter_by(id=strategy_id).one()
+    # if login_session['user_id'] != strategy.user_id:
+    #     return "<script>function myFunction() {alert('You are not authorized to add tactics to this strategy. Please create your own restaurant in order to add items.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        newTactic = Tactic(name=request.form['name'],
+            description=request.form['description'],
+            difficulty=request.form['difficulty'],
+            resource_link=request.form['resource_link'],
+            tool_link=request.form['tool_link'],
+            strategy_id=strategy_id)
+        # later add user_id=strategy.user_id above
+        session.add(newTactic)
+        session.commit()
+        flash('New Tactic: %s  Successfully Created' % (newTactic.name))
+        return redirect(url_for('showTactic', strategy_id=strategy_id))
+    else:
+        return render_template('newTactic.html', strategy_id=strategy_id, strategy=strategy)
 
 # Edit a menu item
+@app.route('/strategy/<int:strategy_id>/tactic/<int:tactic_id>/edit', methods=['GET', 'POST'])
+def editTactic(strategy_id, tactic_id):
+    # if 'username' not in login_session:
+    #     return redirect('/login')
+    editedTactic = session.query(Tactic).filter_by(id=tactic_id).one()
+    strategy = session.query(Strategy).filter_by(id=strategy_id).one()
+    # if login_session['user_id'] != strategy.user_id:
+    #     return "<script>function myFunction() {alert('You are not authorized to edit tactics to this strategy. Please create your own strategy in order to edit items.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        if request.form['name']:
+            editedTactic.name = request.form['name']
+        if request.form['description']:
+            editedTactic.description = request.form['description']
+        if request.form['difficulty']:
+            editedTactic.difficulty = request.form['difficulty']
+        if request.form['resource_link']:
+            editedTactic.resource_link = request.form['resource_link']
+        if request.form['tool_link']:
+            editedTactic.tool_link = request.form['tool_link']
 
+        session.add(editedTactic)
+        session.commit()
 
-# @app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/edit', methods=['GET', 'POST'])
-# def editMenuItem(restaurant_id, menu_id):
-#     if 'username' not in login_session:
-#         return redirect('/login')
-#     editedItem = session.query(MenuItem).filter_by(id=menu_id).one()
-#     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-#     if login_session['user_id'] != restaurant.user_id:
-#         return "<script>function myFunction() {alert('You are not authorized to edit menu items to this restaurant. Please create your own restaurant in order to edit items.');}</script><body onload='myFunction()''>"
-#     if request.method == 'POST':
-#         if request.form['name']:
-#             editedItem.name = request.form['name']
-#         if request.form['description']:
-#             editedItem.description = request.form['description']
-#         if request.form['price']:
-#             editedItem.price = request.form['price']
-#         if request.form['course']:
-#             editedItem.course = request.form['course']
-#         session.add(editedItem)
-#         session.commit()
-#         flash('Menu Item Successfully Edited')
-#         return redirect(url_for('showMenu', restaurant_id=restaurant_id))
-#     else:
-#         return render_template('editmenuitem.html', restaurant_id=restaurant_id, menu_id=menu_id, item=editedItem)
+        flash('Tactic Successfully Edited')
+        return redirect(url_for('showTactic', strategy_id=strategy_id))
+    else:
+        return render_template('editTactic.html', strategy_id=strategy_id, tactic_id=tactic_id, tactic=editedTactic)
 
 
 # Delete a menu item
-# @app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/delete', methods=['GET', 'POST'])
-# def deleteMenuItem(restaurant_id, menu_id):
-#     if 'username' not in login_session:
-#         return redirect('/login')
-#     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-#     itemToDelete = session.query(MenuItem).filter_by(id=menu_id).one()
-#     if login_session['user_id'] != restaurant.user_id:
-#         return "<script>function myFunction() {alert('You are not authorized to delete menu items to this restaurant. Please create your own restaurant in order to delete items.');}</script><body onload='myFunction()''>"
-#     if request.method == 'POST':
-#         session.delete(itemToDelete)
-#         session.commit()
-#         flash('Menu Item Successfully Deleted')
-#         return redirect(url_for('showMenu', restaurant_id=restaurant_id))
-#     else:
-#         return render_template('deleteMenuItem.html', item=itemToDelete)
+@app.route('/strategy/<int:strategy_id>/tactic/<int:tactic_id>/delete', methods=['GET', 'POST'])
+def deleteTactic(strategy_id, tactic_id):
+    # if 'username' not in login_session:
+    #     return redirect('/login')
+    strategy = session.query(Strategy).filter_by(id=strategy_id).one()
+    itemToDelete = session.query(Tactic).filter_by(id=tactic_id).one()
+    # if login_session['user_id'] != strategy.user_id:
+    #     return "<script>function myFunction() {alert('You are not authorized to delete tactics in this strategy. Please create your own strategy in order to delete tactics.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        session.delete(itemToDelete)
+        session.commit()
+        flash('Tactic Successfully Deleted')
+        return redirect(url_for('showTactic', strategy_id=strategy_id))
+    else:
+        return render_template('deleteTactic.html', tactic=itemToDelete)
 
 
 # Disconnect based on provider

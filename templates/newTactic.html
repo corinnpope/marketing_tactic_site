@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+	<div class="row">
+		<div class="col-md-12">
+			<h1>New Tactic</h1>
+			<h3>For {{strategy.name}}</h3>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6 col-md-offset-1 padding-top">
+			<form action="#" method = "post">
+				<div class="form-group">
+					<label for="name">Name:</label>
+					<input type ="text" maxlength="100" class="form-control" name="name" placeholder="Name of the tactic">
+
+					<label for="description">Description:</label>
+					<textarea class="form-control" rows="3" name="description" placeholder="Description of the tactic"></textarea>
+
+					<label for="resource_link">Best Resource:</label>
+					<textarea class="form-control" rows="3" name="resource_link" placeholder="URL to the best resource for learning about the topic (be sure to include http:// in your response)"></textarea>
+
+					<label for="tool_link">Best Tool:</label>
+					<textarea class="form-control" rows="3" name="tool_link" placeholder="URL for the best tool for completing the tactic. (be sure to include http:// in your response)"></textarea>
+
+					<label for="difficulty">Difficulty:</label>
+					<div class="radio">
+					  <label>
+					    <input type="radio" name="difficulty" id="course1" value="Easy">Easy
+					  </label>
+					</div>
+					<div class="radio">
+					  <label>
+					    <input type="radio" name="difficulty" id="course2" value="Medium">Medium
+					  </label>
+					</div>
+					<div class="radio">
+					  <label>
+					    <input type="radio" name="difficulty" id="course3" value="Hard">Hard
+					  </label>
+					</div>
+
+					<button type="submit" class="btn btn-success" id="submit" type="submit">
+					<span class="glyphicon glyphicon-glass" aria-hidden="true"></span>Create</button>
+				</div>
+			</form>
+		</div>
+	</div>
+{% endblock %}

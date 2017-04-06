@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+	<div class="row">
+		<div class="col-md-12">
+			<h1>Edit {{tactic.name}}</h1>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<form action="#" method = "post">
+
+				<div class="form-group">
+					<label for="name">Name:</label>
+					<input type ="text" maxlength="100" class="form-control" name="name" value="{{tactic.name}}">
+
+					<label for="description">Description:</label>
+					<textarea class="form-control" rows="3" name="description">{{tactic.description}}</textarea>
+
+					<label for="resource_link">Best Resource:</label>
+					<textarea class="form-control" rows="3" name="resource_link">{{tactic.resource_link}}</textarea>
+
+					<label for="tool_link">Best Tool:</label>
+					<textarea class="form-control" rows="3" name="tool_link">{{tactic.tool_link}}</textarea>
+
+					<label for="course">Difficulty:</label>
+					<div class="radio">
+					  <label>
+					    <input type="radio" name="difficulty" id="difficulty_easy" value="Easy" {%if tactic.difficulty =='Easy'%}checked{%endif%}> Easy
+					  </label>
+
+					</div>
+					<div class="radio">
+					  <label>
+					    <input type="radio" name="difficulty" id="difficulty_med" value="Medium" {%if tactic.difficulty =='Medium'%}checked{%endif%}> Medium
+					  </label>
+					</div>
+					<div class="radio">
+					  <label>
+					    <input type="radio" name="difficulty" id="difficulty_hard" value="Hard" {%if tactic.difficulty =='Hard'%}checked{%endif%}>Hard
+					  </label>
+					</div>
+
+					<button type="submit" class="btn btn-default" id="submit" type="submit">
+					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Update</button>
+
+				</div>
+			</form>
+		</div>
+	</div>
+{% endblock %}
