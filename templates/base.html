@@ -1,8 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" itemscope itemtype="http://schema.org/Article">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- BEGIN Pre-requisites -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+  </script>
+  <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
+  </script>
+  <!-- END Pre-requisites -->
+  <script>
+    function start() {
+      gapi.load('auth2', function() {
+        auth2 = gapi.auth2.init({
+          client_id: '306508088470-2d3bcoe1ft36q1b8fb5e04bbi8dbqk1o.apps.googleusercontent.com',
+          // Scopes to request in addition to 'profile' and 'email'
+          //scope: 'additional_scope'
+        });
+      });
+    }
+  </script>
+
+
+
+    <meta name="google-signin-client_id" content="306508088470-2d3bcoe1ft36q1b8fb5e04bbi8dbqk1o.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+
 
         <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
 
@@ -28,29 +52,39 @@
             <a class="nav-link" href="/">Home</a>
           </li>
           <li class="nav-item">
-          {% if username %}
+          {% if g.user %}
             <!-- <li class = "nav-item">Hello, {{username}}</li> -->
-            <li><a class="nav-link" href="new_post"> New Strategy Category</a></li>
-            <li><a class="nav-link" href="new_post"> New Tactic</a></li>
+            <li><a class="nav-link" href="/strategy/new"> New Strategy Category</a></li>
+            <li><a class="nav-link" href="{{ url_for('pickStrategy')}}"> New Tactic</a></li>
             <li><a class="nav-link" href="/logout">logout</a></li>
           {% else %}
             <li><a class="nav-link" href="/login">login</a></li>
-            <li><a class="nav-link" href="/signup">signup</a></li>
+            <li><a class="nav-link" href="/login">signup</a></li>
           {% endif %}
           </li>
         </ul>
         <ul class="navbar-nav navbar-right">
-        {% if username %}
-         <li><a id="light-nav-item" href="">Hello, {{username}}. </a></li>
+        {% if g.user %}
+         <li><a id="light-nav-item" href="">Hello, {{g.user.screen_name}}. </a></li>
         {% endif %}
         </ul>
       </div>
     </nav>
 
+
+<div
+  class="fb-like"
+  data-share="true"
+  data-width="450"
+  data-show-faces="true">
+</div>
+
   <div class="container-fluid">
         {% block content %}
         {% endblock %}
   </div><!-- /.container -->
+
+
 
 
     <!-- Bootstrap core JavaScript
@@ -62,6 +96,8 @@
     <script src="static/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="static/js/ie10-viewport-bug-workaround.js"></script>
+
+
   </body>
 </html>
 

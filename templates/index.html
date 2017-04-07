@@ -1,13 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-
-</head>
-
-<body>  
-
-<!-- GOOGLE PLUS SIGN IN-->
-<h1>LOGIN YO</h1>
+{% block body %}
   <h2>Overview</h2>
   {% if g.user %}
     <p>
@@ -19,15 +10,7 @@
         <input type=submit value="Tweet!">
       </p>
     </form>
-    {% if tweets %}
-    <h3>Your Timeline</h3>
-    <ul>
-    {% for tweet in tweets %}
-      <li><a href="http://twitter.com/{{ tweet.user.screen_name
-        }}">{{ tweet.user.screen_name }}</a>: {{ tweet.text|urlize }}</li>
-    {% endfor %}
-    </ul>
-    {% endif %}
+
   {% else %}
     <p>
       Sign in to view your public timeline and to tweet from this
@@ -37,7 +20,5 @@
       <a href="{{ url_for('login') }}"><img src="{{
         url_for('static', filename='sign-in.png') }}" alt="sign in"></a>
     </p>
-
-  </body>
-
-  </html>
+  {% endif %}
+{% endblock %}

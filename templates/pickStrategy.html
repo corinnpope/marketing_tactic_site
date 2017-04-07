@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+	<div class="alert alert-info" role="alert">
+		{% with messages = get_flashed_messages() %}
+	      {% if messages %}
+	          
+	        <ul>
+	        {% for message in messages %}
+	            <li> <strong> {{ message }} </strong> </li>
+	        {% endfor %}
+	        </ul>
+	        {% endif %}
+	    {% endwith %}
+	</div>
+
+	<div class="row">
+		<div class="col-md-12">
+			<h3>Pick a category to create a tactic under</h3>
+		</div>
+	</div> 
+
+	<div class="row">
+		<div class="col-md-12">
+			<h1>Strategies</div>
+		</h1>
+	</div>
+
+	{% for strategy in strategies %}
+			<div class="row">
+				<div class="col-md-12">
+					<h3><a href="{{url_for('showTactic', strategy_id = strategy.id)}}">{{strategy.name}}</a></h3>
+					<br>
+				</div>
+			</div>
+	{% endfor %}
+
+{% endblock %}

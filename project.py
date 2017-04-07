@@ -1,36 +1,132 @@
-from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
+from flask import Flask, render_template, request, redirect, jsonify, url_for, flash, session, g
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from database_setup import User, Strategy, Tactic, Base
 from flask import session as login_session
 import random
 import string
-# from oauth2client.client import flow_from_clientsecrets
-# from oauth2client.client import FlowExchangeError
-# import httplib2
-# import json
-# from flask import make_response
-# import requests
+from oauth2client.client import flow_from_clientsecrets
+from oauth2client.client import FlowExchangeError
+from uuid import uuid4
+import httplib2
+import json
+from flask import make_response
+import requests
+from flask_oauthlib.client import OAuth
+
+
+
+oauth = OAuth()
 
 app = Flask(__name__)
+app.debug = True
+app.secret_key = 'development'
 
 
-# Connect to Database and create database session
-engine = create_engine('sqlite:///strategytactic.db')
-Base.metadata.bind = engine
 
-DBSession = sessionmaker(bind=engine)
-session = DBSession()
+oauth = OAuth(app)
+
+twitter = oauth.remote_app(
+    'twitter',
+    consumer_key='01FydfAxogRCXMBoqeGu2Vft8',
+    consumer_secret='x2cFDgKeEpFarvrLoyoGgVmr7IqvGdi7ioXgw3YOlbL1NfpGJf',
+    base_url='https://api.twitter.com/1.1/',
+    request_token_url='https://api.twitter.com/oauth/request_token',
+    access_token_url='https://api.twitter.com/oauth/access_token',
+    authorize_url='https://api.twitter.com/oauth/authorize'
+)
 
 
-# Create anti-forgery state token
-# @app.route('/login')
-# def showLogin():
-#     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
-#                     for x in xrange(32))
-#     login_session['state'] = state
-#     # return "The current session state is %s" % login_session['state']
-#     return render_template('login.html', STATE=state)
+@twitter.tokengetter
+def get_twitter_token():
+    if 'twitter_oauth' in session:
+        resp = session['twitter_oauth']
+        return resp['oauth_token'], resp['oauth_token_secret']
+
+
+@app.before_request
+def before_request():
+    g.user = None
+    if 'twitter_oauth' in session:
+        g.user = session['twitter_oauth']
+
+
+@app.route('/')
+def index():
+    tweets = None
+    if g.user is not None:
+        resp = twitter.request('statuses/home_timeline.json')
+        if resp.status == 200:
+            tweets = resp.data
+        else:
+            flash('Unable to load tweets from Twitter.')
+    return render_template('index.html', tweets=tweets)
+
+# @app.route('/')
+# def index():
+#     tweets = None
+#     if g.user is not None:
+#         resp = twitter.request('statuses/home_timeline.json')
+#         if resp.status == 200:
+#             tweets = resp.data
+#         else:
+#             flash('Unable to load tweets from Twitter.')
+#     return render_template('index.html', tweets=tweets)
+
+@app.route('/tweet', methods=['POST'])
+def tweet():
+    if g.user is None:
+        return redirect(url_for('login', next=request.url))
+    status = request.form['tweet']
+    if not status:
+        return redirect(url_for('index'))
+    resp = twitter.post('statuses/update.json', data={
+        'status': status
+    })
+
+    if resp.status == 403:
+        flash("Error: #%d, %s " % (
+            resp.data.get('errors')[0].get('code'),
+            resp.data.get('errors')[0].get('message'))
+        )
+    elif resp.status == 401:
+        flash('Authorization error with Twitter.')
+    else:
+        flash('Successfully tweeted your tweet (ID: #%s)' % resp.data['id'])
+    return redirect(url_for('index'))
+
+
+@app.route('/login')
+def login():
+    callback_url = url_for('oauthorized', next=request.args.get('next'))
+    return twitter.authorize(callback=callback_url or request.referrer or None)
+
+
+@app.route('/logout')
+def logout():
+    session.pop('twitter_oauth', None)
+    return redirect(url_for('index'))
+
+
+@app.route('/oauthorized')
+def oauthorized():
+    resp = twitter.authorized_response()
+    if resp is None:
+        flash('You denied the request to sign in.')
+    else:
+        session['twitter_oauth'] = resp
+    return redirect(url_for('showStrategies'))
+# Login
+
+# facebook = oauth.remote_app('facebook',
+#     base_url='https://graph.facebook.com/',
+#     request_token_url=None,
+#     access_token_url='/oauth/access_token',
+#     authorize_url='https://www.facebook.com/dialog/oauth',
+#     consumer_key=181379492379757,
+#     consumer_secret=be1e04fbacdd9d50a7dfbaabf29d95aa,
+#     request_token_params={'scope': 'email'}
+# )
 
 
 # @app.route('/fbconnect', methods=['POST'])
@@ -42,26 +138,27 @@ session = DBSession()
 #     access_token = request.data
 #     print "access token received %s " % access_token
 
-#     app_id = json.loads(open('fb_client_secrets.json', 'r').read())[
-#         'web']['app_id']
+#         # Exchange client token for long-lived server-side token
+#     fb_client_secrets_file = (app.config['OAUTH_SECRETS_LOCATION'] +
+#                               'fb_client_secrets.json')
+#     app_id = json.loads(
+#         open(fb_client_secrets_file, 'r').read())['web']['app_id']
 #     app_secret = json.loads(
-#         open('fb_client_secrets.json', 'r').read())['web']['app_secret']
-#     url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
-#         app_id, app_secret, access_token)
-#     h = httplib2.Http()
-#     result = h.request(url, 'GET')[1]
+#         open(fb_client_secrets_file, 'r').read())['web']['app_secret']
+#     url = ('https://graph.facebook.com/v2.8/oauth/access_token?'
+#            'grant_type=fb_exchange_token&client_id=%s&client_secret=%s'
+#            '&fb_exchange_token=%s') % (app_id, app_secret, access_token)
+#     http = httplib2.Http()
+#     result = http.request(url, 'GET')[1]
+#     data = json.loads(result)
 
-#     # Use token to get user info from API
-#     userinfo_url = "https://graph.facebook.com/v2.4/me"
-#     # strip expire tag from access token
-#     token = result.split("&")[0]
+#     # Extract the access token from response
+#     token = 'access_token=' + data['access_token']
 
-
-#     url = 'https://graph.facebook.com/v2.4/me?%s&fields=name,id,email' % token
-#     h = httplib2.Http()
-#     result = h.request(url, 'GET')[1]
-#     # print "url sent for API access:%s"% url
-#     # print "API JSON result: %s" % result
+#     # Use token to get user info from API.
+#     url = 'https://graph.facebook.com/v2.8/me?%s&fields=name,id,email' % token
+#     http = httplib2.Http()
+#     result = http.request(url, 'GET')[1]
 #     data = json.loads(result)
 #     login_session['provider'] = 'facebook'
 #     login_session['username'] = data["name"]
@@ -69,7 +166,8 @@ session = DBSession()
 #     login_session['facebook_id'] = data["id"]
 
 #     # The token must be stored in the login_session in order to properly logout, let's strip out the information before the equals sign in our token
-#     stored_token = token.split("=")[1]
+#     data = json.loads(result)
+#     token = 'access_token=' + data['access_token']
 #     login_session['access_token'] = stored_token
 
 #     # Get user picture
@@ -104,126 +202,36 @@ session = DBSession()
 #     facebook_id = login_session['facebook_id']
 #     # The access token must me included to successfully logout
 #     access_token = login_session['access_token']
-#     url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id,access_token)
+#     url = ('https://graph.facebook.com/oauth/access_token?'
+#            'grant_type=fb_exchange_token&client_id=%s&client_secret=%s'
+#            '&fb_exchange_token=%s') % (app_id, app_secret, access_token)
 #     h = httplib2.Http()
 #     result = h.request(url, 'DELETE')[1]
 #     return "you have been logged out"
 
-
-# @app.route('/gconnect', methods=['POST'])
-# def gconnect():
-#     # Validate state token
-#     if request.args.get('state') != login_session['state']:
-#         response = make_response(json.dumps('Invalid state parameter.'), 401)
-#         response.headers['Content-Type'] = 'application/json'
-#         return response
-#     # Obtain authorization code
-#     code = request.data
-
-#     try:
-#         # Upgrade the authorization code into a credentials object
-#         oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
-#         oauth_flow.redirect_uri = 'postmessage'
-#         credentials = oauth_flow.step2_exchange(code)
-#     except FlowExchangeError:
-#         response = make_response(
-#             json.dumps('Failed to upgrade the authorization code.'), 401)
-#         response.headers['Content-Type'] = 'application/json'
-#         return response
-
-#     # Check that the access token is valid.
-#     access_token = credentials.access_token
-#     url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
-#            % access_token)
-#     h = httplib2.Http()
-#     result = json.loads(h.request(url, 'GET')[1])
-#     # If there was an error in the access token info, abort.
-#     if result.get('error') is not None:
-#         response = make_response(json.dumps(result.get('error')), 500)
-#         response.headers['Content-Type'] = 'application/json'
-#         return response
-
-#     # Verify that the access token is used for the intended user.
-#     gplus_id = credentials.id_token['sub']
-#     if result['user_id'] != gplus_id:
-#         response = make_response(
-#             json.dumps("Token's user ID doesn't match given user ID."), 401)
-#         response.headers['Content-Type'] = 'application/json'
-#         return response
-
-#     # Verify that the access token is valid for this app.
-#     if result['issued_to'] != CLIENT_ID:
-#         response = make_response(
-#             json.dumps("Token's client ID does not match app's."), 401)
-#         print "Token's client ID does not match app's."
-#         response.headers['Content-Type'] = 'application/json'
-#         return response
-
-#     stored_credentials = login_session.get('credentials')
-#     stored_gplus_id = login_session.get('gplus_id')
-#     if stored_credentials is not None and gplus_id == stored_gplus_id:
-#         response = make_response(json.dumps('Current user is already connected.'),
-#                                  200)
-#         response.headers['Content-Type'] = 'application/json'
-#         return response
-
-#     # Store the access token in the session for later use.
-#     login_session['access_token'] = credentials.access_token
-#     login_session['gplus_id'] = gplus_id
-
-#     # Get user info
-#     userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
-#     params = {'access_token': credentials.access_token, 'alt': 'json'}
-#     answer = requests.get(userinfo_url, params=params)
-
-#     data = answer.json()
-
-#     login_session['username'] = data['name']
-#     login_session['picture'] = data['picture']
-#     login_session['email'] = data['email']
-#     # ADD PROVIDER TO LOGIN SESSION
-#     login_session['provider'] = 'google'
-
-#     # see if user exists, if it doesn't make a new one
-#     user_id = getUserID(data["email"])
-#     if not user_id:
-#         user_id = createUser(login_session)
-#     login_session['user_id'] = user_id
-
-#     output = ''
-#     output += '<h1>Welcome, '
-#     output += login_session['username']
-#     output += '!</h1>'
-#     output += '<img src="'
-#     output += login_session['picture']
-#     output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
-#     flash("you are now logged in as %s" % login_session['username'])
-#     print "done!"
-#     return output
-
-# # User Helper Functions
+# User Helper Functions
 
 
-# def createUser(login_session):
-#     newUser = User(name=login_session['username'], email=login_session[
-#                    'email'], picture=login_session['picture'])
-#     session.add(newUser)
-#     session.commit()
-#     user = session.query(User).filter_by(email=login_session['email']).one()
-#     return user.id
+def createUser(login_session):
+    newUser = User(name=login_session['username'], email=login_session[
+                   'email'], picture=login_session['picture'])
+    db_session.add(newUser)
+    db_session.commit()
+    user = db_session.query(User).filter_by(email=login_session['email']).one()
+    return user.id
 
 
-# def getUserInfo(user_id):
-#     user = session.query(User).filter_by(id=user_id).one()
-#     return user
+def getUserInfo(user_id):
+    user = db_session.query(User).filter_by(id=user_id).one()
+    return user
 
 
-# def getUserID(email):
-#     try:
-#         user = session.query(User).filter_by(email=email).one()
-#         return user.id
-#     except:
-#         return None
+def getUserID(email):
+    try:
+        user = db_session.query(User).filter_by(email=email).one()
+        return user.id
+    except:
+        return None
 
 # DISCONNECT - Revoke a current user's token and reset their login_session
 
@@ -249,55 +257,68 @@ session = DBSession()
 #         return response
 
 
-# JSON APIs to view Restaurant Information
-# @app.route('/restaurant/<int:restaurant_id>/menu/JSON')
-# def restaurantMenuJSON(restaurant_id):
-#     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-#     items = session.query(MenuItem).filter_by(
-#         restaurant_id=restaurant_id).all()
-#     return jsonify(MenuItems=[i.serialize for i in items])
+# Connect to Database and create database session
+engine = create_engine('sqlite:///strategytactic.db')
+Base.metadata.bind = engine
+
+DBSession = sessionmaker(bind=engine)
+db_session = DBSession()
+
+# make some JSON endpoints
+@app.route('/strategy/<int:strategy_id>/tactic/JSON')
+def strategyTacticJSON(strategy_id):
+    strategy = db_session.query(Strategy).filter_by(id=strategy_id).one()
+    tactics = db_session.query(Tactic).filter_by(
+        strategy_id=strategy_id).all()
+    return jsonify(Tactics=[t.serialize for t in tactics])
 
 
-# @app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/JSON')
-# def menuItemJSON(restaurant_id, menu_id):
-#     Menu_Item = session.query(MenuItem).filter_by(id=menu_id).one()
-#     return jsonify(Menu_Item=Menu_Item.serialize)
+@app.route('/strategy/<int:strategy_id>/tactic/<int:tactic_id>/JSON')
+def tacticJSON(strategy_id, tactic_id):
+    Tactic = db_session.query(Tactic).filter_by(id=tactic_id).one()
+    return jsonify(Tactic=Tactic.serialize)
 
 
-# @app.route('/restaurant/JSON')
-# def restaurantsJSON():
-#     restaurants = session.query(Restaurant).all()
-#     return jsonify(restaurants=[r.serialize for r in restaurants])
+@app.route('/strategy/JSON')
+def strategiesJSON():
+    strategies = db_session.query(Strategy).all()
+    return jsonify(strategies=[s.serialize for s in strategies])
 
 # Show all restaurants
 @app.route('/')
 @app.route('/strategies/')
 def showStrategies():
-    strategies = session.query(Strategy).order_by(asc(Strategy.name))
+    strategies = db_session.query(Strategy).order_by(asc(Strategy.name))
     # if 'username' not in login_session:
     #     return render_template('publicrestaurants.html', restaurants=restaurants)
     # else:
     return render_template('strategies.html', strategies=strategies)
 
-# Create a new restaurant
+@app.route('/pickStrategy')
+def pickStrategy():
+    strategies = db_session.query(Strategy).order_by(asc(Strategy.name))
+    # if 'username' not in login_session:
+    #     return render_template('publicrestaurants.html', restaurants=restaurants)
+    # else:
+    return render_template('pickStrategy.html', strategies=strategies)
 
-
+# Create a new strategy
 @app.route('/strategy/new/', methods=['GET', 'POST'])
 def newStrategy():
     if request.method == 'POST':
         newStrategy = Strategy(name=request.form['name'])
-        session.add(newStrategy)
+        db_session.add(newStrategy)
         flash('New Strategy %s Successfully Created' % newStrategy.name)
-        session.commit()
+        db_session.commit()
         return redirect(url_for('showStrategies'))
     else:
         return render_template('newStrategy.html')
 
-# Edit a restaurant
 
+# Edit a restaurant
 @app.route('/strategy/<int:strategy_id>/edit/', methods=['GET', 'POST'])
 def editStrategy(strategy_id):
-    editedStrategy = session.query(
+    editedStrategy = db_session.query(
         Strategy).filter_by(id=strategy_id).one()
     # if 'username' not in login_session:
     #     return redirect('/login')
@@ -312,20 +333,19 @@ def editStrategy(strategy_id):
         return render_template('editStrategy.html', strategy=editedStrategy)
 
 
-
 # Delete a restaurant
 @app.route('/strategy/<int:strategy_id>/delete/', methods=['GET', 'POST'])
 def deleteStrategy(strategy_id):
-    strategyToDelete = session.query(
+    strategyToDelete = db_session.query(
         Strategy).filter_by(id=strategy_id).one()
     # if 'username' not in login_session:
     #     return redirect('/login')
     # if strategyToDelete.user_id != login_session['user_id']:
     #     return "<script>function myFunction() {alert('You are not authorized to delete this strategy. Please create your own restaurant in order to delete.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
-        session.delete(strategyToDelete)
+        db_session.delete(strategyToDelete)
         flash('%s Successfully Deleted' % strategyToDelete.name)
-        session.commit()
+        db_session.commit()
         return redirect(url_for('showStrategies', strategy_id=strategy_id))
     else:
         return render_template('deleteStrategy.html', strategy=strategyToDelete)
@@ -339,9 +359,9 @@ def deleteStrategy(strategy_id):
 @app.route('/strategy/<int:strategy_id>/')
 @app.route('/strategy/<int:strategy_id>/tactic/')
 def showTactic(strategy_id):
-    strategy = session.query(Strategy).filter_by(id=strategy_id).one()
+    strategy = db_session.query(Strategy).filter_by(id=strategy_id).one()
     # creator = getUserInfo(strategy.user_id)
-    tactics = session.query(Tactic).filter_by(
+    tactics = db_session.query(Tactic).filter_by(
         strategy_id=strategy_id).all()
     # if 'username' not in login_session or creator.id != login_session['user_id']:
     #     return render_template('publicmenu.html', tactics=tactics, strategy=strategy, creator=creator)
@@ -354,7 +374,7 @@ def showTactic(strategy_id):
 def newTactic(strategy_id):
     # if 'username' not in login_session:
     #     return redirect('/login')
-    strategy = session.query(Strategy).filter_by(id=strategy_id).one()
+    strategy = db_session.query(Strategy).filter_by(id=strategy_id).one()
     # if login_session['user_id'] != strategy.user_id:
     #     return "<script>function myFunction() {alert('You are not authorized to add tactics to this strategy. Please create your own restaurant in order to add items.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
@@ -365,8 +385,8 @@ def newTactic(strategy_id):
             tool_link=request.form['tool_link'],
             strategy_id=strategy_id)
         # later add user_id=strategy.user_id above
-        session.add(newTactic)
-        session.commit()
+        db_session.add(newTactic)
+        db_session.commit()
         flash('New Tactic: %s  Successfully Created' % (newTactic.name))
         return redirect(url_for('showTactic', strategy_id=strategy_id))
     else:
@@ -377,8 +397,8 @@ def newTactic(strategy_id):
 def editTactic(strategy_id, tactic_id):
     # if 'username' not in login_session:
     #     return redirect('/login')
-    editedTactic = session.query(Tactic).filter_by(id=tactic_id).one()
-    strategy = session.query(Strategy).filter_by(id=strategy_id).one()
+    editedTactic = db_session.query(Tactic).filter_by(id=tactic_id).one()
+    strategy = db_session.query(Strategy).filter_by(id=strategy_id).one()
     # if login_session['user_id'] != strategy.user_id:
     #     return "<script>function myFunction() {alert('You are not authorized to edit tactics to this strategy. Please create your own strategy in order to edit items.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
@@ -393,8 +413,8 @@ def editTactic(strategy_id, tactic_id):
         if request.form['tool_link']:
             editedTactic.tool_link = request.form['tool_link']
 
-        session.add(editedTactic)
-        session.commit()
+        db_session.add(editedTactic)
+        db_session.commit()
 
         flash('Tactic Successfully Edited')
         return redirect(url_for('showTactic', strategy_id=strategy_id))
@@ -407,40 +427,17 @@ def editTactic(strategy_id, tactic_id):
 def deleteTactic(strategy_id, tactic_id):
     # if 'username' not in login_session:
     #     return redirect('/login')
-    strategy = session.query(Strategy).filter_by(id=strategy_id).one()
-    itemToDelete = session.query(Tactic).filter_by(id=tactic_id).one()
+    strategy = db_session.query(Strategy).filter_by(id=strategy_id).one()
+    itemToDelete = db_session.query(Tactic).filter_by(id=tactic_id).one()
     # if login_session['user_id'] != strategy.user_id:
     #     return "<script>function myFunction() {alert('You are not authorized to delete tactics in this strategy. Please create your own strategy in order to delete tactics.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
-        session.delete(itemToDelete)
-        session.commit()
+        db_session.delete(itemToDelete)
+        db_session.commit()
         flash('Tactic Successfully Deleted')
         return redirect(url_for('showTactic', strategy_id=strategy_id))
     else:
         return render_template('deleteTactic.html', tactic=itemToDelete)
-
-
-# Disconnect based on provider
-# @app.route('/disconnect')
-# def disconnect():
-#     if 'provider' in login_session:
-#         if login_session['provider'] == 'google':
-#             gdisconnect()
-#             del login_session['gplus_id']
-#             del login_session['credentials']
-#         if login_session['provider'] == 'facebook':
-#             fbdisconnect()
-#             del login_session['facebook_id']
-#         del login_session['username']
-#         del login_session['email']
-#         del login_session['picture']
-#         del login_session['user_id']
-#         del login_session['provider']
-#         flash("You have successfully been logged out.")
-#         return redirect(url_for('showRestaurants'))
-#     else:
-#         flash("You were not logged in")
-#         return redirect(url_for('showRestaurants'))
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
