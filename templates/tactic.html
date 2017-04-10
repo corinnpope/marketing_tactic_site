@@ -5,11 +5,13 @@
 	<div class="row">
 		<div class="col-md-12">
 			<h1>{{ strategy.name }}
+
 <!-- 			<figure class="creator">
 				<img src="{{ url_for('static', filename='blank_user.gif') }}">
 				<figcaption>Menu creator's name goes here</figcaption>
 			</figure> -->
 			</h1>
+			<h2>By: {{strategy.user_id}}</h2>
 		</div>
 	</div>
 
@@ -30,6 +32,7 @@
 		<div class="col-md-12">
 					<p><a href = "{{url_for('editStrategy', strategy_id = strategy.id)}}">Edit</a> | 
 					<a href = "{{url_for('deleteStrategy', strategy_id = strategy.id)}}">Delete</a></p>
+					<h3><a href="{{url_for('newTactic', strategy_id = strategy.id)}}">Create a New Tactic</a></h3>
 		</div>
 
 	</div>
@@ -47,6 +50,9 @@
 								<p class="menu-price">{{t.resource_link}}</p>
 							<p class="menu-price">{{t.tool_link}}</p>
 							</div>
+							<p><a href = "{{url_for('editTactic', strategy_id = strategy.id, tactic_id = t.id)}}">Edit</a> | 
+							<a href = "{{url_for('deleteTactic', strategy_id = strategy.id, tactic_id = t.id)}}">Delete</a></p>
+
 						{% endif %}
 					{% endfor %}
 			</div>

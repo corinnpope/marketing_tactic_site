@@ -1,43 +1,42 @@
 <!DOCTYPE html>
 <html lang="en" itemscope itemtype="http://schema.org/Article">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <!-- BEGIN Pre-requisites -->
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
-  </script>
-  <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
-  </script>
-  <!-- END Pre-requisites -->
-  <script>
-    function start() {
-      gapi.load('auth2', function() {
-        auth2 = gapi.auth2.init({
-          client_id: '306508088470-2d3bcoe1ft36q1b8fb5e04bbi8dbqk1o.apps.googleusercontent.com',
-          // Scopes to request in addition to 'profile' and 'email'
-          //scope: 'additional_scope'
-        });
+<!-- BEGIN Pre-requisites -->
+<!--   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+</script>
+<script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
+</script> -->
+<!-- END Pre-requisites -->
+<!--   <script>
+  function start() {
+    gapi.load('auth2', function() {
+      auth2 = gapi.auth2.init({
+        client_id: '306508088470-2d3bcoe1ft36q1b8fb5e04bbi8dbqk1o.apps.googleusercontent.com',
+        // Scopes to request in addition to 'profile' and 'email'
+        //scope: 'additional_scope'
       });
-    }
-  </script>
+    });
+  }
+</script> -->
 
 
 
-    <meta name="google-signin-client_id" content="306508088470-2d3bcoe1ft36q1b8fb5e04bbi8dbqk1o.apps.googleusercontent.com">
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+<!--   <meta name="google-signin-client_id" content="306508088470-2d3bcoe1ft36q1b8fb5e04bbi8dbqk1o.apps.googleusercontent.com">
+  <script src="https://apis.google.com/js/platform.js" async defer></script> -->
+
+  <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" type="text/css">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 
 
-        <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-
-          <!-- Custom styles for this template -->
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
   <title>Stractic.co | Marketing Strategies and Tactics for Online Businesses</title>
 </head>
 
 <body>
 
-    <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+    <nav class="navbar navbar-toggleable-md navbar-light">
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -70,14 +69,6 @@
         </ul>
       </div>
     </nav>
-
-
-<div
-  class="fb-like"
-  data-share="true"
-  data-width="450"
-  data-show-faces="true">
-</div>
 
   <div class="container-fluid">
         {% block content %}

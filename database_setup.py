@@ -25,6 +25,9 @@ class Strategy(Base):
 
   # table data
   name = Column(String(250), nullable=False)
+  # TODO - Add Strategy description & picture 
+  # description = Column(Text)
+  # TODO - Add strategy owner name??
 
   @property
   def serialize(self):

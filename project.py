@@ -51,17 +51,6 @@ def before_request():
         g.user = session['twitter_oauth']
 
 
-@app.route('/')
-def index():
-    tweets = None
-    if g.user is not None:
-        resp = twitter.request('statuses/home_timeline.json')
-        if resp.status == 200:
-            tweets = resp.data
-        else:
-            flash('Unable to load tweets from Twitter.')
-    return render_template('index.html', tweets=tweets)
-
 # @app.route('/')
 # def index():
 #     tweets = None
@@ -72,6 +61,17 @@ def index():
 #         else:
 #             flash('Unable to load tweets from Twitter.')
 #     return render_template('index.html', tweets=tweets)
+
+# @app.route('/')
+# def index():
+# #     tweets = None
+#     if g.user is not None:
+#         resp = twitter.request('statuses/home_timeline.json')
+#         if resp.status == 200:
+#             tweets = resp.data
+#         else:
+#             flash('Unable to load tweets from Twitter.')
+#     return render_template('strategies.html', tweets=tweets)
 
 @app.route('/tweet', methods=['POST'])
 def tweet():
@@ -105,7 +105,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('twitter_oauth', None)
-    return redirect(url_for('index'))
+    return render_template('logout.html')
 
 
 @app.route('/oauthorized')
@@ -115,6 +115,16 @@ def oauthorized():
         flash('You denied the request to sign in.')
     else:
         session['twitter_oauth'] = resp
+        access_token = resp['oauth_token']
+        session['access_token'] = access_token
+        session['screen_name'] = resp['screen_name']
+        session['user_id'] = resp['user_id']
+
+
+        session['twitter_token'] = (
+            resp['oauth_token'],
+            resp['oauth_token_secret'])
+
     return redirect(url_for('showStrategies'))
 # Login
 
@@ -212,12 +222,11 @@ def oauthorized():
 # User Helper Functions
 
 
-def createUser(login_session):
-    newUser = User(name=login_session['username'], email=login_session[
-                   'email'], picture=login_session['picture'])
+def createUser():
+    newUser = User(name=g.user.screen_name)
     db_session.add(newUser)
     db_session.commit()
-    user = db_session.query(User).filter_by(email=login_session['email']).one()
+    user = db_session.query(User).filter_by(name=g.user.screen_name).one()
     return user.id
 
 
@@ -226,9 +235,9 @@ def getUserInfo(user_id):
     return user
 
 
-def getUserID(email):
+def getUserID(name):
     try:
-        user = db_session.query(User).filter_by(email=email).one()
+        user = db_session.query(User).filter_by(name=g.user.screen_name).one()
         return user.id
     except:
         return None
@@ -288,7 +297,19 @@ def strategiesJSON():
 @app.route('/')
 @app.route('/strategies/')
 def showStrategies():
+
+    # resp = twitter.post('statuses/update.json', data={
+    #     'status': status
+    # })
+
+
     strategies = db_session.query(Strategy).order_by(asc(Strategy.name))
+    access_token = session.get('access_token')
+    # if access_token is None:
+    #     return redirect(url_for('login'))
+    if access_token:
+        access_token = access_token[0]
+
     # if 'username' not in login_session:
     #     return render_template('publicrestaurants.html', restaurants=restaurants)
     # else:
@@ -305,8 +326,16 @@ def pickStrategy():
 # Create a new strategy
 @app.route('/strategy/new/', methods=['GET', 'POST'])
 def newStrategy():
+    if g.user is None:
+        return redirect(url_for('login', next=request.url))
+    # if g.user is not None:
+    #     screen_name = g.user
+    #     print(screen_name)
+    #     # user_id = dict.get('screen_name')
+    #     # print("user id = %s" % screen_name)
     if request.method == 'POST':
-        newStrategy = Strategy(name=request.form['name'])
+        newStrategy = Strategy(name=request.form['name'],
+                                user_id=request.form['user_id'])
         db_session.add(newStrategy)
         flash('New Strategy %s Successfully Created' % newStrategy.name)
         db_session.commit()
@@ -318,12 +347,18 @@ def newStrategy():
 # Edit a restaurant
 @app.route('/strategy/<int:strategy_id>/edit/', methods=['GET', 'POST'])
 def editStrategy(strategy_id):
+    
+    if g.user is None:
+        return redirect(url_for('login', next=request.url))
     editedStrategy = db_session.query(
         Strategy).filter_by(id=strategy_id).one()
     # if 'username' not in login_session:
     #     return redirect('/login')
-    # if editedStrategy.user_id != login_session['user_id']:
-    #     return "<script>function myFunction() {alert('You are not authorized to edit this strategy. Please create your own restaurant in order to edit.');}</script><body onload='myFunction()''>"
+    # ###STOPPED HERE, COULDN"T FIGURE OUT HOW TO CHECK CURRENT USER
+    if editedStrategy.user_id != session['screen_name']:
+        return "<script>function myFunction() {alert('You are not authorized to edit this strategy. Please create your own strategy in order to edit.'); window.location.href='/strategies';}</script><body onload='myFunction()''>"
+    # ### STOPPED, BUT I THINK I GOT IT WORKING WHEN I ADDED SESSION TO OAUTHORIZATION METHOD
+
     if request.method == 'POST':
         if request.form['name']:
             editedStrategy.name = request.form['name']
@@ -336,12 +371,15 @@ def editStrategy(strategy_id):
 # Delete a restaurant
 @app.route('/strategy/<int:strategy_id>/delete/', methods=['GET', 'POST'])
 def deleteStrategy(strategy_id):
+    if g.user is None:
+        return redirect(url_for('login', next=request.url))
     strategyToDelete = db_session.query(
         Strategy).filter_by(id=strategy_id).one()
     # if 'username' not in login_session:
     #     return redirect('/login')
-    # if strategyToDelete.user_id != login_session['user_id']:
-    #     return "<script>function myFunction() {alert('You are not authorized to delete this strategy. Please create your own restaurant in order to delete.');}</script><body onload='myFunction()''>"
+    if strategyToDelete.user_id != session['screen_name']:
+        return "<script>function myFunction() {alert('You are not authorized to delete this strategy. Please create your own strategy in order to delete.'); window.location.href='/strategies';}</script><body onload='myFunction()''>"
+
     if request.method == 'POST':
         db_session.delete(strategyToDelete)
         flash('%s Successfully Deleted' % strategyToDelete.name)
@@ -372,11 +410,14 @@ def showTactic(strategy_id):
 # Create a new tactic
 @app.route('/strategy/<int:strategy_id>/tactic/new/', methods=['GET', 'POST'])
 def newTactic(strategy_id):
+    if g.user is None:
+        return redirect(url_for('login', next=request.url))
     # if 'username' not in login_session:
     #     return redirect('/login')
     strategy = db_session.query(Strategy).filter_by(id=strategy_id).one()
-    # if login_session['user_id'] != strategy.user_id:
-    #     return "<script>function myFunction() {alert('You are not authorized to add tactics to this strategy. Please create your own restaurant in order to add items.');}</script><body onload='myFunction()''>"
+    # TODO - remove this part - there's no reason a user shouldn't be able to create a new tactic for a strategy...
+    if session['screen_name'] != strategy.user_id:
+        return "<script>function myFunction() {alert('You are not authorized to add tactics to this strategy. Please create your own strategy in order to add items.');window.location.href='/strategies';}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         newTactic = Tactic(name=request.form['name'],
             description=request.form['description'],
@@ -395,12 +436,16 @@ def newTactic(strategy_id):
 # Edit a menu item
 @app.route('/strategy/<int:strategy_id>/tactic/<int:tactic_id>/edit', methods=['GET', 'POST'])
 def editTactic(strategy_id, tactic_id):
+    if g.user is None:
+        return redirect(url_for('login', next=request.url))
     # if 'username' not in login_session:
     #     return redirect('/login')
     editedTactic = db_session.query(Tactic).filter_by(id=tactic_id).one()
     strategy = db_session.query(Strategy).filter_by(id=strategy_id).one()
-    # if login_session['user_id'] != strategy.user_id:
-    #     return "<script>function myFunction() {alert('You are not authorized to edit tactics to this strategy. Please create your own strategy in order to edit items.');}</script><body onload='myFunction()''>"
+    # TODO - but you should only be able to edit/delete your own tactics ... unless you're an admin which is a task for another day
+    # change to tactic.user_id...
+    if session['screen_name'] != strategy.user_id:
+        return "<script>function myFunction() {alert('You are not authorized to edit tactics to this strategy. Please create your own strategy in order to edit items.');window.location.href='/strategies';}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         if request.form['name']:
             editedTactic.name = request.form['name']
@@ -425,12 +470,14 @@ def editTactic(strategy_id, tactic_id):
 # Delete a menu item
 @app.route('/strategy/<int:strategy_id>/tactic/<int:tactic_id>/delete', methods=['GET', 'POST'])
 def deleteTactic(strategy_id, tactic_id):
+    if g.user is None:
+        return redirect(url_for('login', next=request.url))
     # if 'username' not in login_session:
     #     return redirect('/login')
     strategy = db_session.query(Strategy).filter_by(id=strategy_id).one()
     itemToDelete = db_session.query(Tactic).filter_by(id=tactic_id).one()
-    # if login_session['user_id'] != strategy.user_id:
-    #     return "<script>function myFunction() {alert('You are not authorized to delete tactics in this strategy. Please create your own strategy in order to delete tactics.');}</script><body onload='myFunction()''>"
+    if session['screen_name'] != strategy.user_id:
+        return "<script>function myFunction() {alert('You are not authorized to delete tactics in this strategy. Please create your own strategy in order to delete tactics.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         db_session.delete(itemToDelete)
         db_session.commit()
