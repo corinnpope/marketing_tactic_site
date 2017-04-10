@@ -407,7 +407,7 @@ def showTactic(strategy_id):
     # if 'username' not in login_session or creator.id != login_session['user_id']:
     #     return render_template('publicmenu.html', tactics=tactics, strategy=strategy, creator=creator)
     # else:
-    return render_template('tactic.html', tactics=tactics, strategy=strategy)
+    return render_template('tactic.html', tactics=tactics, strategy=strategy, strategy_id=strategy_id)
 
 
 # show details of a tactic
