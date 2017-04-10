@@ -2,88 +2,72 @@
 {% block content %}
 
 
-	<div class="row">
-		<div class="col-md-12">
-			<h1>{{ strategy.name }}
-
-<!-- 			<figure class="creator">
-				<img src="{{ url_for('static', filename='blank_user.gif') }}">
-				<figcaption>Menu creator's name goes here</figcaption>
-			</figure> -->
-			</h1>
-			<h2>By: {{strategy.user_id}}</h2>
-		</div>
+<div class="row">
+	<div class="col-md-12 text-center">
+		<img src="{{ url_for('static', filename='img/strategy.jpg') }}" class="img-fluid" alt="Responsive image">
+		<h1>{{ strategy.name }}</h1>
+		<p><a href = "{{url_for('editStrategy', strategy_id = strategy.id)}}">Edit {{strategy.name}}</a> | 
+		<a href = "{{url_for('deleteStrategy', strategy_id = strategy.id)}}">Delete {{strategy.name}}</a>  <br>  
+		<a href="{{url_for('newTactic', strategy_id = strategy.id)}}">Create a New Tactic in {{strategy.name}}</a></p>
 	</div>
-
-<div class = 'flash'>
-	{% with messages = get_flashed_messages() %}
-      {% if messages %}
-          
-        <ul>
-        {% for message in messages %}
-            <li> <strong> {{ message }} </strong> </li>
-        {% endfor %}
-        </ul>
-        {% endif %}
-    {% endwith %}
-
 </div>
-	<div class="row">
-		<div class="col-md-12">
-					<p><a href = "{{url_for('editStrategy', strategy_id = strategy.id)}}">Edit</a> | 
-					<a href = "{{url_for('deleteStrategy', strategy_id = strategy.id)}}">Delete</a></p>
-					<h3><a href="{{url_for('newTactic', strategy_id = strategy.id)}}">Create a New Tactic</a></h3>
-		</div>
 
-	</div>
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		    {% for message in messages %}
+			    <div class="alert alert-info" role="alert">
+			        <li> <strong> {{ message }} </strong> </li>
+			    </div>
+		    {% endfor %}
+	{% endif %}
+{% endwith %}
 	
 	{% if tactics !=[] %}	
 		<div class="row">
-			<div class="col-md-1"></div>
-			<div class="col-md-3">
+			<div class="col-md-12">
+			<table class="table table-hover">
+				  <thead>
+				    <tr>
+				      <th>Name</th>
+				      <th>Details</th>
+				      <th>Description</th>
+				      <th>Difficulty</th>
+				    </tr>
+				  </thead>
+				  <tbody>
+				    <tr>
+				    {% for t in tactics %}
+				    
+				      <th scope="row">{{t.name}}</th>
+				      <td><a href="{{url_for('tacticDetails', strategy_id = strategy.id, tactic_id=t.id)}}">Details</a></td>
+				      <td>{{t.description}}</td>
+				      <td>{{t.difficulty}}</td>
+
+				    </tr>
+					{% endfor %}
+				  </tbody>
+				</table>
+			</div>
+
+
+
+<!-- TODO: MAKE TBL SORTABLE BY DIFFICULTY -->
+<!-- 			<div class="col-md-12">
 				<h2>Easy Tactics</h2>
+				<hr>
 					{% for t in tactics %}
 						{% if t.difficulty == 'Easy' %}
-							<div class="menu-item">
 								<h3>{{t.name}}</h3>
 								<p>{{t.description}}</p>
-								<p class="menu-price">{{t.resource_link}}</p>
-							<p class="menu-price">{{t.tool_link}}</p>
-							</div>
+								<p>{{t.resource_link}}</p>
+								<p>{{t.tool_link}}</p>
 							<p><a href = "{{url_for('editTactic', strategy_id = strategy.id, tactic_id = t.id)}}">Edit</a> | 
 							<a href = "{{url_for('deleteTactic', strategy_id = strategy.id, tactic_id = t.id)}}">Delete</a></p>
+						{% endif %}
+					{% endfor %}
+			</div>
+		</div> -->
 
-						{% endif %}
-					{% endfor %}
-			</div>
-			<div class="col-md-4">			
-				<h2>Medium Difficulty Tactics</h2>
-					{% for t in tactics %}
-						{% if t.difficulty == 'Medium' %}
-						<div class="menu-item">
-							<h3>{{t.name}}</h3>
-							<p>{{t.description}}</p>
-							<p class="menu-price">{{t.resource_link}}</p>
-							<p class="menu-price">{{t.tool_link}}</p>
-						</div>
-						{% endif %}
-					{% endfor %}
-			</div>
-			<div class="col-md-3">
-				<h2>Hard Tactics</h2>
-					{% for t in tactics %}
-						{% if t.difficulty == 'Hard' %}
-						<div class="menu-item">
-							<h3>{{t.name}}</h3>
-							<p>{{t.description}}</p>
-							<p class="menu-price">{{t.resource_link}}</p>
-							<p class="menu-price">{{t.tool_link}}</p>
-						</div>
-						{% endif %}
-					{% endfor %}
-				
-			</div>
-			<div class="col-md-1"></div>
-		</div>
+
 	{% endif %}
 {% endblock %}

@@ -4,91 +4,69 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-<!-- BEGIN Pre-requisites -->
-<!--   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
-</script>
-<script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
-</script> -->
-<!-- END Pre-requisites -->
-<!--   <script>
-  function start() {
-    gapi.load('auth2', function() {
-      auth2 = gapi.auth2.init({
-        client_id: '306508088470-2d3bcoe1ft36q1b8fb5e04bbi8dbqk1o.apps.googleusercontent.com',
-        // Scopes to request in addition to 'profile' and 'email'
-        //scope: 'additional_scope'
-      });
-    });
-  }
-</script> -->
-
-
-
-<!--   <meta name="google-signin-client_id" content="306508088470-2d3bcoe1ft36q1b8fb5e04bbi8dbqk1o.apps.googleusercontent.com">
-  <script src="https://apis.google.com/js/platform.js" async defer></script> -->
-
-  <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" type="text/css">
+  <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet" type="text/css">
   <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-
 
   <title>Stractic.co | Marketing Strategies and Tactics for Online Businesses</title>
 </head>
 
 <body>
+  <nav class="navbar navbar-toggleable-md navbar-light">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+      <a class="navbar-brand" href="#">
+        <img src="/static/img/stractic-logo.png" width="100" height="100" class="d-inline-block align-top" alt="">
+      </a>
 
-    <nav class="navbar navbar-toggleable-md navbar-light">
-      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-        <a class="navbar-brand" href="#">
-          <img src="/static/img/logo.png" width="30" height="30" class="d-inline-block align-top" alt="">
-          Stractic
-        </a>
-
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="/">Home</a>
-          </li>
-          <li class="nav-item">
-          {% if g.user %}
-            <!-- <li class = "nav-item">Hello, {{username}}</li> -->
-            <li><a class="nav-link" href="/strategy/new"> New Strategy Category</a></li>
-            <li><a class="nav-link" href="{{ url_for('pickStrategy')}}"> New Tactic</a></li>
-            <li><a class="nav-link" href="/logout">logout</a></li>
-          {% else %}
-            <li><a class="nav-link" href="/login">login</a></li>
-            <li><a class="nav-link" href="/login">signup</a></li>
-          {% endif %}
-          </li>
-        </ul>
-        <ul class="navbar-nav navbar-right">
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
         {% if g.user %}
-         <li><a id="light-nav-item" href="">Hello, {{g.user.screen_name}}. </a></li>
+          <!-- <li class = "nav-item">Hello, {{username}}</li> -->
+          <li><a class="nav-link" href="/strategy/new"> New Strategy Category</a></li>
+          <li><a class="nav-link" href="{{ url_for('pickStrategy')}}"> New Tactic</a></li>
+          <li><a class="nav-link" href="/logout">logout</a></li>
+        {% else %}
+          <li><a class="nav-link" href="/login">login</a></li>
+          <li><a class="nav-link" href="/login">signup</a></li>
         {% endif %}
-        </ul>
-      </div>
-    </nav>
+        </li>
+      </ul>
+      <ul class="navbar-nav navbar-right">
+      {% if g.user %}
+       <li>Hello, {{g.user.screen_name}}.</li>
+      {% endif %}
+      </ul>
+    </div>
+  </nav>
 
   <div class="container-fluid">
         {% block content %}
         {% endblock %}
   </div><!-- /.container -->
 
+  <footer>
+      <p>Copyright 2017 <a href="http://www.corinnpope.com">Corinn Pope</a>
+
+  </footer>
 
 
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="static/js/jquery-slim.min.js"><\/script>')</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-    <script src="static/js/bootstrap.min.js"></script>
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="static/js/ie10-viewport-bug-workaround.js"></script>
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+  <script>window.jQuery || document.write('<script src="static/js/jquery-slim.min.js"><\/script>')</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+  <script src="static/js/bootstrap.min.js"></script>
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script src="static/js/ie10-viewport-bug-workaround.js"></script>
 
 
-  </body>
+</body>
 </html>
 

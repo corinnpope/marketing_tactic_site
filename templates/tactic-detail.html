@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		    {% for message in messages %}
+			    <div class="alert alert-info" role="alert">
+			        <li> <strong> {{ message }} </strong> </li>
+			    </div>
+		    {% endfor %}
+	{% endif %}
+{% endwith %}
+
+<div class="row">
+	<div class="col-md-12 text-center">
+		<h1>{{tactic.name}}</h1>
+		<a href = "{{url_for('editTactic', strategy_id = strategy.id, tactic_id = tactic.id)}}">Edit</a> | 
+		<a href = "{{url_for('deleteTactic', strategy_id = strategy.id, tactic_id = tactic.id)}}">Delete</a></p>
+	</div>
+</div>
+
+	<div class="row">
+		<div class="col-md-1"></div>
+		<div class="col-md-2">
+			<h3>Description:</h3>
+		</div>
+		<div class="col-md-8">
+			<p>{{tactic.description}}</p>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-1"></div>
+		<div class="col-md-2">
+			<h3>Best Resource:</h3>
+		</div>
+		<div class="col-md-8">
+			<a href="{{tactic.resource_link}}">{{tactic.resource_link}}</a>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-1"></div>
+		<div class="col-md-2">
+			<h3>Best Tool:</h3>
+		</div>
+		<div class="col-md-8">
+			<a href="{{tactic.tool_link}}">{{tactic.tool_link}}</a>
+		</div>
+	</div>
+
+
+
+			  </div>
+			</div>
+		</div>
+<!-- 					<h3><a href="{{url_for('showTactic', strategy_id = strategy.id)}}">{{strategy.name}}</a></h3>
+					<p><a href="{{url_for('newTactic', strategy_id = strategy.id)}}">Create a New Tactic under {{strategy.name}}</a></p>
+					<p><a href = "{{url_for('editStrategy', strategy_id = strategy.id)}}">Edit</a> | 
+					<a href = "{{url_for('deleteStrategy', strategy_id = strategy.id)}}">Delete</a></p> -->
+
+</div>
+
+{% endblock %}

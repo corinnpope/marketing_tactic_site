@@ -10,11 +10,22 @@ html {
   line-height: 1.15;
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
+    position: relative;
+  min-height: 100%;
 }
 
+
 body {
-  margin: 0;
+    margin: 0 0 100px; /* bottom = footer height */
 }
+footer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 50px;
+    width: 100%;
+}
+
 
 article,
 aside,

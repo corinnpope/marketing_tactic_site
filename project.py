@@ -335,6 +335,8 @@ def newStrategy():
     #     # print("user id = %s" % screen_name)
     if request.method == 'POST':
         newStrategy = Strategy(name=request.form['name'],
+                                description=request.form['description'],
+                                image=request.form['image'],
                                 user_id=request.form['user_id'])
         db_session.add(newStrategy)
         flash('New Strategy %s Successfully Created' % newStrategy.name)
@@ -405,6 +407,16 @@ def showTactic(strategy_id):
     #     return render_template('publicmenu.html', tactics=tactics, strategy=strategy, creator=creator)
     # else:
     return render_template('tactic.html', tactics=tactics, strategy=strategy)
+
+
+# show details of a tactic
+@app.route('/strategy/<int:strategy_id>/tactic/<int:tactic_id>/details/')
+def tacticDetails(strategy_id, tactic_id):
+    # get the strategy it belongs to
+    strategy = db_session.query(Strategy).filter_by(id=strategy_id).one()
+    # find the tactic
+    tactic = db_session.query(Tactic).filter_by(id=tactic_id).one()
+    return render_template('tactic-detail.html',strategy=strategy,  tactic=tactic)
 
 
 # Create a new tactic

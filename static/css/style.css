@@ -1,12 +1,26 @@
 /*using IDs to up the priority points so they get over the base bootstrap css*/
-
 #main-image {
 	background-image: url("../marketing.png");
 	background-size: cover;
-	opacity: 0.5;
+	
 }
 
 #main-card {
 	padding: 2em;
 	margin: 2em;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+body {
+    margin: 0 0 100px; /* bottom = footer height */
+}
+footer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 100px;
+    width: 100%;
 }

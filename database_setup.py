@@ -26,7 +26,8 @@ class Strategy(Base):
   # table data
   name = Column(String(250), nullable=False)
   # TODO - Add Strategy description & picture 
-  # description = Column(Text)
+  description = Column(Text)
+  image = Column(Text)
   # TODO - Add strategy owner name??
 
   @property

@@ -15,7 +15,7 @@ session.add(test_user)
 session.commit()
 
 # New Strategy
-strat1 = Strategy(user_id=1, name="Email Marketing")
+strat1 = Strategy(user_id=1, name="Email Marketing", description="Email Marketing gets you in front of your customer whenever you need to via their inbox", image="http://wazoefu.com/sites/default/files/email-marketing-strategy-in-Tanzania.png")
 session.add(strat1)
 session.commit()
 
@@ -50,7 +50,7 @@ session.commit()
 
 # Repeat!
 # New Strategy
-strat2 = Strategy(user_id=1, name="Content Marketing")
+strat2 = Strategy(user_id=1, name="Content Marketing", description="Engage your customers by entertaining and informing them with relevant content.", image="https://blog.crowdspring.com/wp-content/uploads/2016/07/AAEAAQAAAAAAAAbUAAAAJGUyOGMyMzI2LTI4NzEtNDc1ZC1hMmRjLWQ4NDExNzU0YjhiNw.png")
 session.add(strat2)
 session.commit()
 
