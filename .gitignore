@@ -1,2 +1,4 @@
-populate_db.pyc
-database_setup.pyc
+venv
+*.pyc
+staticfiles
+.env
