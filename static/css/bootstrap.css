@@ -16,14 +16,7 @@ html {
 
 
 body {
-    margin: 0 0 100px; /* bottom = footer height */
-}
-footer {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    height: 50px;
-    width: 100%;
+    margin: 0 0 40px; /* bottom = footer height */
 }
 
 
@@ -833,35 +826,35 @@ pre code {
   position: relative;
   margin-left: auto;
   margin-right: auto;
-  padding-right: 15px;
-  padding-left: 15px;
+/*  padding-right: 15px;
+  padding-left: 15px;*/
 }
 
 @media (min-width: 576px) {
   .container-fluid {
-    padding-right: 15px;
-    padding-left: 15px;
+/*    padding-right: 15px;
+    padding-left: 15px;*/
   }
 }
 
 @media (min-width: 768px) {
   .container-fluid {
-    padding-right: 15px;
-    padding-left: 15px;
+/*    padding-right: 15px;
+    padding-left: 15px;*/
   }
 }
 
 @media (min-width: 992px) {
   .container-fluid {
-    padding-right: 15px;
-    padding-left: 15px;
+/*    padding-right: 15px;
+    padding-left: 15px;*/
   }
 }
 
 @media (min-width: 1200px) {
   .container-fluid {
-    padding-right: 15px;
-    padding-left: 15px;
+/*    padding-right: 15px;
+    padding-left: 15px;*/
   }
 }
 
@@ -2649,7 +2642,7 @@ select.form-control-lg:not([size]):not([multiple]), .input-group-lg > select.for
   font-weight: normal;
   line-height: 1.25;
   text-align: center;
-  white-space: nowrap;
+/*  white-space: nowrap;*/
   vertical-align: middle;
   -webkit-user-select: none;
      -moz-user-select: none;

@@ -1,12 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div id="main-image" class="jumbotron jumbotron-fluid">
-		<!-- <img src="{{ url_for('static', filename='img/marketing.png') }}" class="img-fluid" alt="marketing_graphic"> -->
+<div class="row" id ="main-image">
+<!-- <div id="main-image" class="jumbotron jumbotron-fluid"> -->
+	<div class="col-md-8">
+	<!-- <img src="{{ url_for('static', filename='img/marketing.png') }}" class="img-fluid" alt="marketing_graphic"> -->
 		<h1 class="display-3">Find Marketing Tactics and Strategies That Fit Your Business' Needs</h1>
-	    <p class="lead">This is a modified jumbotron that occupies the entire horizontal space of its parent.</p>
+    	<p class="lead">Ranked by difficulty and packed with resources, you're sure to find one that will work for you. </p>
+    </div>
+    <div class="col-md-4">
+    	<img src="{{ url_for('static', filename='img/tactic-meme.jpg') }}" class="img-fluid" alt="marketing_graphic">
+    </div>
 </div>
 
+<div class="row">
+	<div class="col-md-12">
+		<hr>
+		<br><br>
+	</div>
+</div>
 {% with messages = get_flashed_messages() %}
 	{% if messages %}
 		    {% for message in messages %}
@@ -17,32 +29,47 @@
 	{% endif %}
 {% endwith %}
 
-<div class="row">
-	<div class="col-md-12 text-center">
-		<h1>Strategies</h1>
-		<a href="{{url_for('newStrategy')}}" >New Strategy</a>
+
+
+<div id="strategy-list">
+	<div class="row">
+		<div class="col-md-12 text-center">
+			<h1>Pick A Strategy To Explore</h1>
+			<a href="{{url_for('newStrategy')}}" >New Strategy</a>
+
+		</div>
+	</div>
+
+	<div class="row">
+		{% for strategy in strategies %}
+			<div class="col-md-4">
+				<div class="card" id="main-card">
+				  <img class="card-img-top" src="{{strategy.image}}" height="200px" width="200px" alt="Card image cap">
+				  <div class="card-block">
+				    <h4 class="card-title"><a href="{{url_for('showTactic', strategy_id = strategy.id)}}">{{strategy.name}}</a></h4>
+				    <p class="card-text">{{strategy.description}}</p>
+				    <a href="{{url_for('showTactic', strategy_id = strategy.id)}}" class="btn btn-primary">See {{strategy.name}} Tactics</a>
+				  </div>
+				</div>
+			</div>
+	<!-- 					<h3><a href="{{url_for('showTactic', strategy_id = strategy.id)}}">{{strategy.name}}</a></h3>
+						<p><a href="{{url_for('newTactic', strategy_id = strategy.id)}}">Create a New Tactic under {{strategy.name}}</a></p>
+						<p><a href = "{{url_for('editStrategy', strategy_id = strategy.id)}}">Edit</a> | 
+						<a href = "{{url_for('deleteStrategy', strategy_id = strategy.id)}}">Delete</a></p> -->
+				
+		{% endfor %}
+				<div class="col-md-4">
+				<div class="card" id="main-card">
+				  <img class="card-img-top" src="{{ url_for('static', filename='img/new-strategy.jpg') }}" height="200px" width="200px" alt="Card image cap">
+				  <div class="card-block">
+				    <h4 class="card-title"><a href="{{url_for('newStrategy')}}">New Strategy</a></h4>
+				    <p class="card-text">Don't See What You're Looking For? Create Your Own Strategy</p>
+				    <a href="{{url_for('newStrategy')}}" class="btn btn-primary">Add New Strategy</a>
+				  </div>
+				</div>
+			</div>
 
 	</div>
 </div>
-
-<div class="row">
-	{% for strategy in strategies %}
-		<div class="col-md-4">
-			<div class="card" id="main-card">
-			  <img class="card-img-top" src="{{strategy.image}}" height="200px" width="200px" alt="Card image cap">
-			  <div class="card-block">
-			    <h4 class="card-title"><a href="{{url_for('showTactic', strategy_id = strategy.id)}}">{{strategy.name}}</a></h4>
-			    <p class="card-text">{{strategy.description}}</p>
-			    <a href="{{url_for('showTactic', strategy_id = strategy.id)}}" class="btn btn-primary">See {{strategy.name}} Tactics</a>
-			  </div>
-			</div>
-		</div>
-<!-- 					<h3><a href="{{url_for('showTactic', strategy_id = strategy.id)}}">{{strategy.name}}</a></h3>
-					<p><a href="{{url_for('newTactic', strategy_id = strategy.id)}}">Create a New Tactic under {{strategy.name}}</a></p>
-					<p><a href = "{{url_for('editStrategy', strategy_id = strategy.id)}}">Edit</a> | 
-					<a href = "{{url_for('deleteStrategy', strategy_id = strategy.id)}}">Delete</a></p> -->
-			
-	{% endfor %}
-</div>
-
 {% endblock %}
+

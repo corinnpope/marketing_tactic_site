@@ -1,7 +1,8 @@
 /*using IDs to up the priority points so they get over the base bootstrap css*/
 #main-image {
-	background-image: url("../marketing.png");
-	background-size: cover;
+	padding-top: 40px;
+	padding-left: 20px;
+	padding-right: 20px;
 	
 }
 
@@ -10,17 +11,14 @@
 	margin: 2em;
 }
 
-html {
-    position: relative;
-    min-height: 100%;
+#strategy-list {
+	background-color: #bdc3c7;
 }
-body {
-    margin: 0 0 100px; /* bottom = footer height */
-}
+
 footer {
     position: absolute;
     left: 0;
     bottom: 0;
-    height: 100px;
+    height: 40px;
     width: 100%;
 }
