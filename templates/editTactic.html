@@ -43,8 +43,9 @@
 					  </label>
 					</div>
 
-					<button type="submit" class="btn btn-default" id="submit" type="submit">
+					<button type="submit" class="btn btn-primary" id="submit" type="submit">
 					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Update</button>
+					<a href="{{ url_for('showTactic', strategy_id=strategy.id)}}">Cancel</a>
 
 				</div>
 			</form>
