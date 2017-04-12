@@ -2,6 +2,7 @@ from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
+# from sqlalchemy import backref
 
 Base = declarative_base()
 
@@ -22,10 +23,11 @@ class Strategy(Base):
   # foreign keys
   user_id = Column(Integer, ForeignKey('user.id'))
   user = relationship(User)
-
+  # configure cascade behavior
+  tactics = relationship("Tactic", backref="belongs_to", cascade="all, delete-orphan")
   # table data
   name = Column(String(250), nullable=False)
-  # TODO - Add Strategy description & picture 
+  # Add Strategy description & picture 
   description = Column(Text)
   image = Column(Text)
   # TODO - Add strategy owner name??
@@ -36,6 +38,8 @@ class Strategy(Base):
     return {
       'name'  :self.name,
       'id'    :self.id,
+      'description' : self.description,
+      'image'       : self.image
     }
 
 
@@ -46,7 +50,8 @@ class Tactic(Base):
 
   # foreign keys
   strategy_id = Column(Integer, ForeignKey('strategy.id'))
-  strategy = relationship(Strategy)
+  # delete the assoc. tactics if the strategy is deleted
+  strategy = relationship(Strategy, cascade="all, delete-orphan", single_parent=True)
   user_id = Column(Integer, ForeignKey('user.id'))
   user = relationship(User)
 

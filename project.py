@@ -98,8 +98,8 @@ def strategyTacticJSON(strategy_id):
 @app.route('/strategy/<int:strategy_id>/tactic/<int:tactic_id>/JSON')
 def tacticJSON(strategy_id, tactic_id):
     """make JSON for each tactic"""
-    Tactic = db_session.query(Tactic).filter_by(id=tactic_id).one()
-    return jsonify(Tactic=Tactic.serialize)
+    tactic = db_session.query(Tactic).filter_by(id=tactic_id).one()
+    return jsonify(Tactic=tactic.serialize)
 
 
 @app.route('/strategy/JSON')
@@ -261,7 +261,8 @@ def newTactic(strategy_id):
                             difficulty=request.form['difficulty'],
                             resource_link=request.form['resource_link'],
                             tool_link=request.form['tool_link'],
-                            strategy_id=strategy_id
+                            strategy_id=strategy_id,
+                            user_id=request.form['user_id']
                             )
         # later add user_id=strategy.user_id above
         db_session.add(newTactic)
